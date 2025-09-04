@@ -10,7 +10,7 @@ import 'package:uuid/uuid.dart';
 class PayWithPayStack {
   String generateUuidV4() {
     var uuid = const Uuid();
-    return uuid.v4();
+    return uuid.v6();
   }
 
   Future<PaymentData?> now({
