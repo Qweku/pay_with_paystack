@@ -167,7 +167,7 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
                     NavigationDelegate(
                       onNavigationRequest: (request) async {
                         final url = request.url;
-        
+
                         switch (url) {
                           case 'https://your-cancel-url.com':
                           case 'https://cancelurl.com':
@@ -180,7 +180,7 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
                               Navigator.of(context).pop();
                             });
                             break;
-        
+
                           default:
                             if (url.contains(widget.callbackUrl)) {
                               await _checkTransactionStatus(
@@ -191,12 +191,13 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
                             }
                             break;
                         }
-        
+
                         return NavigationDecision.navigate;
                       },
                     ),
                   )
                   ..loadRequest(Uri.parse(snapshot.data!.authUrl));
+                FocusManager.instance.primaryFocus?.unfocus();
                 return SafeArea(
                   child: Scaffold(
                     // appBar: AppBar(
@@ -222,7 +223,7 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
                   ),
                 );
               }
-        
+
               if (snapshot.hasError) {
                 return Material(
                   child: Center(
@@ -230,7 +231,7 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
                   ),
                 );
               }
-        
+
               return const Material(
                 child: Center(
                   child: CircularProgressIndicator(),
