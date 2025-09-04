@@ -114,6 +114,7 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
 
   /// Checks for transaction status of current transaction before view closes.
   Future _checkTransactionStatus(String ref) async {
+    FocusManager.instance.primaryFocus?.unfocus();
     http.Response? response;
     try {
       /// Getting data, passing [ref] as a value to the URL that is being requested.
