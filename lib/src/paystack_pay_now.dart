@@ -154,84 +154,87 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false, // Prevent back gesture
-      child: FutureBuilder<PaystackRequestResponse>(
-          future: _makePaymentRequest(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data!.status == true) {
-              final controller = WebViewController()
-                ..setJavaScriptMode(JavaScriptMode.unrestricted)
-                // ..setUserAgent("Flutter;Webview")
-                ..setNavigationDelegate(
-                  NavigationDelegate(
-                    onNavigationRequest: (request) async {
-                      final url = request.url;
-
-                      switch (url) {
-                        case 'https://your-cancel-url.com':
-                        case 'https://cancelurl.com':
-                        case 'https://standard.paystack.co/close':
-                        case 'https://paystack.co/close':
-                        case 'https://github.com/popekabu/pay_with_paystack':
-                          await _checkTransactionStatus(
-                                  snapshot.data!.reference)
-                              .then((value) {
-                            Navigator.of(context).pop();
-                          });
-                          break;
-
-                        default:
-                          if (url.contains(widget.callbackUrl)) {
+        canPop: false, // Prevent back gesture
+        child: FutureBuilder<PaystackRequestResponse>(
+            future: _makePaymentRequest(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data!.status == true) {
+                final controller = WebViewController()
+                  ..setJavaScriptMode(JavaScriptMode.unrestricted)
+                  // ..setUserAgent("Flutter;Webview")
+                  ..setNavigationDelegate(
+                    NavigationDelegate(
+                      onNavigationRequest: (request) async {
+                        final url = request.url;
+        
+                        switch (url) {
+                          case 'https://your-cancel-url.com':
+                          case 'https://cancelurl.com':
+                          case 'https://standard.paystack.co/close':
+                          case 'https://paystack.co/close':
+                          case 'https://github.com/popekabu/pay_with_paystack':
                             await _checkTransactionStatus(
                                     snapshot.data!.reference)
                                 .then((value) {
                               Navigator.of(context).pop();
                             });
-                          }
-                          break;
-                      }
-
-                      return NavigationDecision.navigate;
-                    },
+                            break;
+        
+                          default:
+                            if (url.contains(widget.callbackUrl)) {
+                              await _checkTransactionStatus(
+                                      snapshot.data!.reference)
+                                  .then((value) {
+                                Navigator.of(context).pop();
+                              });
+                            }
+                            break;
+                        }
+        
+                        return NavigationDecision.navigate;
+                      },
+                    ),
+                  )
+                  ..loadRequest(Uri.parse(snapshot.data!.authUrl));
+                return SafeArea(
+                  child: Scaffold(
+                    // appBar: AppBar(
+                    //   automaticallyImplyLeading: false,
+                    //   //TODO -> Now that the Cancel Payment works, you can remove this cancel icon.
+                    //   actions: [
+                    //     InkWell(
+                    //         onTap: () async {
+                    //           await _checkTransactionStatus(
+                    //                   snapshot.data!.reference)
+                    //               .then((value) {
+                    //             Navigator.of(context).pop();
+                    //           });
+                    //         },
+                    //         child: const Icon(Icons.close)),
+                    //   ],
+                    // ),
+                    body: Center(
+                      child: WebViewWidget(
+                        controller: controller,
+                      ),
+                    ),
                   ),
-                )
-                ..loadRequest(Uri.parse(snapshot.data!.authUrl));
-              return Scaffold(
-                // appBar: AppBar(
-                //   automaticallyImplyLeading: false,
-                //   //TODO -> Now that the Cancel Payment works, you can remove this cancel icon.
-                //   actions: [
-                //     InkWell(
-                //         onTap: () async {
-                //           await _checkTransactionStatus(
-                //                   snapshot.data!.reference)
-                //               .then((value) {
-                //             Navigator.of(context).pop();
-                //           });
-                //         },
-                //         child: const Icon(Icons.close)),
-                //   ],
-                // ),
-                body: WebViewWidget(
-                  controller: controller,
-                ),
-              );
-            }
-
-            if (snapshot.hasError) {
-              return Material(
+                );
+              }
+        
+              if (snapshot.hasError) {
+                return Material(
+                  child: Center(
+                    child: Text('${snapshot.error}'),
+                  ),
+                );
+              }
+        
+              return const Material(
                 child: Center(
-                  child: Text('${snapshot.error}'),
+                  child: CircularProgressIndicator(),
                 ),
               );
-            }
-
-            return const Material(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }),
-    );
+            }));
   }
 }
