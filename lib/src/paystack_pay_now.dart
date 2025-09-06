@@ -163,43 +163,42 @@ class _PaystackPayNowState extends State<PaystackPayNow> {
                 final controller = WebViewController()
                   ..setJavaScriptMode(JavaScriptMode.unrestricted)
                   // ..setUserAgent("Flutter;Webview")
-                  ..setNavigationDelegate(
-                    NavigationDelegate(
-                      onNavigationRequest: (request) async {
-                        final url = request.url;
+                  ..setNavigationDelegate(NavigationDelegate(
+                    onNavigationRequest: (request) async {
+                      final url = request.url;
 
-                        switch (url) {
-                          case 'https://your-cancel-url.com':
-                          case 'https://cancelurl.com':
-                          case 'https://standard.paystack.co/close':
-                          case 'https://paystack.co/close':
-                          case 'https://github.com/popekabu/pay_with_paystack':
+                      switch (url) {
+                        case 'https://your-cancel-url.com':
+                        case 'https://cancelurl.com':
+                        case 'https://standard.paystack.co/close':
+                        case 'https://paystack.co/close':
+                        case 'https://github.com/popekabu/pay_with_paystack':
+                          await _checkTransactionStatus(
+                                  snapshot.data!.reference)
+                              .then((value) {
+                            Navigator.of(context).pop();
+                          });
+                          break;
+
+                        default:
+                          if (url.contains(widget.callbackUrl)) {
                             await _checkTransactionStatus(
                                     snapshot.data!.reference)
                                 .then((value) {
                               Navigator.of(context).pop();
                             });
-                            break;
+                          }
+                          break;
+                      }
 
-                          default:
-                            if (url.contains(widget.callbackUrl)) {
-                              await _checkTransactionStatus(
-                                      snapshot.data!.reference)
-                                  .then((value) {
-                                Navigator.of(context).pop();
-                              });
-                            }
-                            break;
-                        }
-
-                        return NavigationDecision.navigate;
-                      },
-                    ),
-                  )
+                      return NavigationDecision.navigate;
+                    },
+                  ))
                   ..loadRequest(Uri.parse(snapshot.data!.authUrl));
                 FocusManager.instance.primaryFocus?.unfocus();
                 return SafeArea(
                   child: Scaffold(
+                    resizeToAvoidBottomInset: false,
                     // appBar: AppBar(
                     //   automaticallyImplyLeading: false,
                     //   //TODO -> Now that the Cancel Payment works, you can remove this cancel icon.
